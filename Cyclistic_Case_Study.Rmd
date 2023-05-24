@@ -1,0 +1,1471 @@
+---
+title: "Cyclistic: A Case Study"
+author: "Ian Millar"
+date: "2023-03-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The Business Task
+
+####### The goals of this project are to determine:
+* how annual Cyclistic members use bikes differently than casual bikers
+* for what reasons casual riders would buy an annual membership
+* how Cyclistic can use marketing strategies centered around digital media to 
+influence Casual riders into becoming annual members
+
+## Data Sources
+
+Throughout this case study, we will be referring to the fictional company 
+*Cyclistic*, though the data is real and is provided by 
+the **Lyft Bikes and Scooters, LLC**'s *Divvy* bicycle sharing service "Bikeshare".
+The data has been licensed for public use by Divvy and the City of Chicago.
+
+The data is available for download [here](https://divvy-tripdata.s3.amazonaws.com/index.html).
+
+###### [(*Data License Agreement*)](https://ride.divvybikes.com/data-license-agreement)
+The data used in this case study ranges from March 1st of 2022 to February 28th of 2023
+
+
+We will also be using Chicago Climate data from March 1st, 2022 to February 28th, 2023. This data was made available by the [Visual Crossing Corporation's](https://www.visualcrossing.com/) [Weather Query Builder](https://www.visualcrossing.com/weather/weather-data-services#)
+
+This data includes the following 33 columns:
+
+ [1] "name"             "datetime"         "tempmax"          "tempmin"         
+ [5] "temp"             "feelslikemax"     "feelslikemin"     "feelslike"       
+ [9] "dew"              "humidity"         "precip"           "precipprob"      
+[13] "precipcover"      "preciptype"       "snow"             "snowdepth"       
+[17] "windgust"         "windspeed"        "winddir"          "sealevelpressure"
+[21] "cloudcover"       "visibility"       "solarradiation"   "solarenergy"     
+[25] "uvindex"          "severerisk"       "sunrise"          "sunset"          
+[29] "moonphase"        "conditions"       "description"      "icon"            
+[33] "stations"     
+
+
+## Data Cleaning and Manipulation
+
+#### Set up the environment
+
+install necessary packages
+```{r download_packages, eval=FALSE}
+install.packages("tidyverse")
+install.packages("hacksaw")
+install.packages("lubridate")
+install.packages("geosphere")
+install.packages("ggeasy")
+install.packages("kableExtra")
+install.packages("scales")
+```
+load tidyverse, hacksaw, lubridate, geosphere, and ggeasy
+
+```{r setup_env, echo=TRUE}
+library(tidyverse)
+library(hacksaw)
+library(lubridate)
+library(geosphere)
+library(ggeasy)
+library(kableExtra)
+library(scales)
+```
+
+#### load data into R Studio
+Loaded all 12 .csv files into RStudio, saved as data frames and formatted 
+'started_at' and 'ended_at' as 'dateTime', like so. 
+
+```{r loading_data_01, cache=TRUE, include=TRUE}
+raw202203 <- read_csv("divvy_raw/202203-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+...
+...
+...
+```{r loading_data_02, cache=TRUE, include=FALSE}
+raw202204 <- read_csv("divvy_raw/202204-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_03, cache=TRUE, include=FALSE}
+raw202205 <- read_csv("divvy_raw/202205-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_04, cache=TRUE, include=FALSE}
+raw202206 <- read_csv("divvy_raw/202206-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_05, cache=TRUE, include=FALSE}
+raw202207 <- read_csv("divvy_raw/202207-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_06, cache=TRUE, include=FALSE}
+raw202208 <- read_csv("divvy_raw/202208-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_07, cache=TRUE, include=FALSE}
+raw202209 <- read_csv("divvy_raw/202209-divvy-publictripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_08, cache=TRUE, include=FALSE}
+raw202210 <- read_csv("divvy_raw/202210-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_09, cache=TRUE, include=FALSE}
+raw202211 <- read_csv("divvy_raw/202211-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_10, cache=TRUE, include=FALSE}
+raw202212 <- read_csv("divvy_raw/202212-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_11, cache=TRUE, include=FALSE}
+raw202301 <- read_csv("divvy_raw/202301-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+```{r loading_data_12, cache=TRUE, include=TRUE}
+raw202302 <- read_csv("divvy_raw/202302-divvy-tripdata.csv", 
+col_types = cols(started_at = col_datetime(format = "%Y-%m-%d %H:%M:%S"), 
+ended_at = col_datetime(format = "%Y-%m-%d %H:%M:%S")))
+```
+
+#### Agregate date
+Combined the 12 data frames into a single data set using 'rbind'.
+
+```{r combined_datasets, cache=TRUE}
+divvy_raw <- rbind(raw202203,raw202204,raw202205,raw202206,raw202207,raw202208,
+                   raw202209,raw202210,raw202211,raw202212,raw202301,raw202302)
+```
+
+#### Create new values based on ride duration
+Create a column for ride duration in seconds
+
+```{r create_ride_duration_in_seconds, cache=TRUE}
+ride_duration <- as.numeric(difftime(divvy_raw$ended_at, divvy_raw$started_at,
+                                     units="secs"))
+```
+
+also one in hours
+
+```{r create_ride_duration_hours, cache=TRUE}
+ride_duration_hours <- as.numeric(difftime(divvy_raw$ended_at, 
+divvy_raw$started_at, units="hours"))
+```
+
+#### Create data frames to be checked for errors in ride duration
+
+Create data frame with ride duration in seconds
+
+```{r create_divvy_with_time_dur, cache=TRUE}
+divvy_with_time_dur_sec <- data.frame(divvy_raw, ride_duration)
+```
+
+Create data frame with ride duration in hours
+
+```{r create_divvy_with_time_dur_hours, cache=TRUE}
+divvy_with_time_dur_hours <- data.frame(divvy_raw,ride_duration_hours)
+```
+
+#### Check for errors in ride duration
+Checked for errors by looking for rides that may have been longer than 24 hours
+
+```{r check_for_long_trips, cache=TRUE}
+divvy_gt_24h <- (divvy_with_time_dur_hours %>% 
+  filter(ride_duration_hours > 24))
+```
+
+```{r count_divvy_gt_24h, cache=TRUE}
+count(divvy_gt_24h)
+```
+
+and checked for rides that were less than 30 seconds
+
+```{r check_for_short_trips, cache=TRUE}
+divvy_lt_30s <- (divvy_with_time_dur_sec %>% 
+  filter(ride_duration < 30))
+```
+
+```{r count_divvy_lt_30s, cache=TRUE}
+count(divvy_lt_30s)
+```
+
+these are a lot of observations that don't seem very relevant. Perhaps the bikes
+were being transported and while riding in the back of a truck, the gps thought
+it was a bike ride? I don't know, but i find it hard to believe that 5,411
+people went on a bike ride for 24 consecutive hours or more in the city of
+Chicago alone. Furthermore, the data shows 82,213 rides lasting less than 30 
+seconds. Perhaps this is due to people starting to ride a bike and then deciding
+not to? That's possible. If so, perhaps most of these people are annual members.
+Let's find out.
+
+```{r graph_of_member_casual_less_than_30_second_ride, cache=TRUE}
+ggplot(divvy_lt_30s, aes(member_casual, fill=member_casual)) + 
+  geom_bar() + 
+  theme_bw() +
+  labs(title = "Numer of Rides Under 30 Seconds long by member type", x = "member type", y = "number of rides under 30 seconds")
+```
+
+While it is mostly members, there are still over 30,000 casual rides lasting 
+less than 30 seconds. That seems wrong. we'll work under the assumption that 
+this data is faulty somehow and not include it for now. Were we able to contact 
+the people at Cyclistic, we could ask for clarification, but as it is a 
+fictional company, we will make do.
+
+
+
+first we'll give a better name to our new variables. we'll change ride_duration
+to ride_duration_in_seconds and ride_duration_hours to ride_duration_in_hours
+and get rid of the old ones
+
+```{r change_name_1, cache=TRUE}
+ride_duration_in_seconds <- ride_duration
+ride_duration_in_hours <- ride_duration_hours
+rm(ride_duration,ride_duration_hours)
+```
+
+#### Filter out suspicious rides
+Now we'll filter out these abnormally long and short rides. Perhaps I should
+have created this single data frame from the start, rather than the two other
+two, but this will do just fine.
+
+```{r combining_the_data_frames_and_filtering, cache=TRUE}
+divvyfiltered <- data.frame(divvy_raw,ride_duration_in_seconds,ride_duration_in_hours) %>% 
+  filter(ride_duration_in_hours<24,ride_duration_in_seconds>30)
+```
+
+Let's subtract divvyfiltered from divvy_raw.
+
+```{r count_and_compare, cache=TRUE}
+count(divvy_raw)-count(divvyfiltered)
+```
+
+Almost 90,000 observations removed.
+
+```{r count_divvyfiltered, cache=TRUE}
+count(divvyfiltered)
+```
+
+We've still got 5,739,277 observations though, so we haven't lost much.
+
+#### Remove any rows with missing data
+Now we'll use 'drop_na' to look for any rows in our data with missing values.
+
+```{r check_duplicates, cache=TRUE}
+divvy_drop_na <- drop_na(divvyfiltered)
+```
+
+let's see how many rows had NA values
+
+```{r count_na_rows_removed, cache=TRUE}
+count(divvyfiltered)-count(divvy_drop_na)
+```
+
+Wow! Over a million rows! that's kind of a lot. We'll have to investigate and see what the amount of missing data is in each column.
+
+let's do that now.
+
+```{r count_na_per_column, cache=TRUE}
+colSums(is.na(divvyfiltered))
+```
+
+It seems like most of it is the start_station_name, start_station_id, end_station_name, and end_station_id. There are no rows missing data in the start_lat and start_lng columns, and few missing end_lat, and end_lng, perhaps we can cross reference these with other bits of data to find the missing station names and ids.
+
+Let's create a lookup table of station ids and coordinates that can be used to assign station names and ids to the columns with coordinates but not station names or ids. First, we'll create a new column by concatenating start_station_id with end_station_id.
+
+```{r select_location_data, cache=TRUE}
+divvy_drop_na$start_to_end_station_id <- paste(divvy_drop_na$start_station_id, divvy_drop_na$end_station_id, sep =" - ")
+```
+
+then we'll filter for distinct start_to_end_station_id values to create our lookup table.
+
+```{r create_coords_lookup_table, cache=TRUE}
+coords_lookup <- divvy_drop_na %>% distinct(start_to_end_station_id, .keep_all = TRUE)
+```
+
+and we'll combine our coordinates so we can use them to lookup missing station names and ids. first we'll do the start coordinates.
+
+```{r refining_lookup_table_1}
+coords_lookup$start_coords <- paste(coords_lookup$start_lat, coords_lookup$start_lng, sep ="_")
+```
+
+and we'll do the same for the ending coordinates.
+
+```{r refining_lookup_table_2}
+coords_lookup$end_coords <- paste(coords_lookup$end_lat, coords_lookup$end_lng, sep ="_")
+```
+
+Now let's grab the columns we'll be working with for the lookup table.
+
+```{r refine_lookup_table}
+coords_lookup_table <- select(coords_lookup, start_station_id, start_station_name, end_station_id, end_station_name, start_coords, end_coords)
+```
+
+now let's grab our NA values from earlier with keep_na, a part of the hacksaw package. Because we want to return data where any of the four station data points are NA, we'll run it four times...
+
+```{r keep_na_start_id_from_divvyfiltered, cache=TRUE}
+divvy_keep_nasid <- divvyfiltered %>% keep_na(start_station_id)
+```
+
+```{r keep_na_start_name_from_divvyfiltered, cache=TRUE}
+divvy_keep_nasn <- divvyfiltered %>% keep_na(start_station_name)
+```
+
+```{r keep_na_end_id_from_divvyfiltered, cache=TRUE}
+divvy_keep_naeid <- divvyfiltered %>% keep_na(end_station_id)
+```
+
+```{r keep_na_end_name_from_divvyfiltered, cache=TRUE}
+divvy_keep_naen <- divvyfiltered %>% keep_na(end_station_name)
+```
+
+then use nested outer joins to bring them all together.
+
+```{r outer_joins_for_keep_nas, cache=TRUE}
+na_outer_join <- merge(merge(merge(divvy_keep_nasid, divvy_keep_nasn, all=TRUE),
+                        divvy_keep_naeid, all=TRUE),
+                        divvy_keep_naen, all=TRUE)
+```
+
+now we'll concatenate start_lar and start_lng to create start_coords, which will be used with the the lookup table
+```{r join_coords_start}
+na_outer_join$start_coords <- paste(na_outer_join$start_lat, na_outer_join$start_lng, sep ="_")
+```
+
+and the end coords.
+
+```{r join_cords_end}
+na_outer_join$end_coords <- paste(na_outer_join$end_lat, na_outer_join$end_lng, sep ="_")
+```
+
+Great! Now we'll trim it down to what we need.
+```{r trimming_lookup_table}
+coords_lookup_table <- select(coords_lookup, start_station_id, start_station_name, end_station_id, end_station_name, start_coords, end_coords)
+```
+
+Okay, now that we've got those data frames set up, we'll use merge to merge na_outer_join with the lookup table. But first, to make it easier and less computationally intense, we'll do this in two parts. To start, we'll use select to grab all the rows except the ones involving end locations.
+
+```{r select_start_location_rows_from_na_outer_join}
+na_start <- na_outer_join %>% select("ride_id", "rideable_type", "started_at", "ended_at", "start_station_name", "start_station_id", "start_lat", "start_lng", "member_casual", "ride_duration_in_seconds", "ride_duration_in_hours", "start_coords")
+```
+
+while we're at it, we'll also do the same for all the rows with the end location data.
+
+```{r select_end_location_rows_from_na_outer_join}
+na_end <- na_outer_join %>% select("ride_id", "rideable_type", "started_at", "ended_at", "end_station_name", "end_station_id", "end_lat", "end_lng", "member_casual", "ride_duration_in_seconds", "ride_duration_in_hours", "end_coords")
+```
+
+Perfect! Now we'll do the same with the trimmed lookup table to create two lookup tables.
+
+```{r create_start_lookup_table}
+start_lookup_table <- coords_lookup_table %>% select("start_station_name", "start_station_id", "start_coords")
+```
+
+```{r create_end_lookup_table}
+end_lookup_table <- coords_lookup_table %>% select("end_station_id", "end_station_name", "end_coords")
+```
+
+Then we'll use match and is.na to pull data from the lookup table. first we'll do it for the start_station_name.
+
+```{r lookup_start_station_name}
+na_start$start_station_name[is.na(na_start$start_station_name)] <- start_lookup_table$start_station_name[match(na_start$start_coords, start_lookup_table$start_coords)][is.na(na_start$start_station_name)]
+```
+
+then start_station_id
+
+```{r lookup_start_station_id}
+na_start$start_station_id[is.na(na_start$start_station_id)] <- start_lookup_table$start_station_id[match(na_start$start_coords, start_lookup_table$start_coords)][is.na(na_start$start_station_id)]
+```
+
+then end_station_name
+
+```{r lookup_end_station_name}
+na_end$end_station_name[is.na(na_end$end_station_name)] <- end_lookup_table$end_station_name[match(na_end$end_coords, end_lookup_table$end_coords)][is.na(na_end$end_station_name)]
+```
+
+and finally end_station_id
+
+```{r lookup_end_station_id}
+na_end$end_station_id[is.na(na_end$end_station_id)] <- end_lookup_table$end_station_id[match(na_end$end_coords, end_lookup_table$end_coords)][is.na(na_end$end_station_id)]
+```
+
+Now we'll merge na_start with na_end
+
+```{r merge_na_start_with_na_end}
+merged_na <- merge(na_start, na_end, by = c("ride_id", "rideable_type", "started_at", "ended_at", "member_casual", "ride_duration_in_seconds", "ride_duration_in_hours"))
+```
+
+and we'll clean that data to remove any data with unrecoverable na values
+```{r drop_na_any_unrecoverable_data}
+cleaned_na <- drop_na(merged_na)
+```
+
+```{r count_merged_na}
+count(merged_na)
+```
+```{r count_cleaned_na}
+count(cleaned_na)
+```
+
+Of the 1,293,545 data points with missing data, we were able to recover 420,918 of them. That's pretty good! Let's add them back to the rest of our data
+
+First we'll drop our start_to_end_station_id from our divvy_drop_na data frame, so the two data sets have the same set of columns
+
+```{r trim_down_divvy_drop_na_for_rbind}
+divvy_drop_na <- divvy_drop_na %>% select("ride_id", "rideable_type", "started_at", "ended_at", "start_station_name", "start_station_id", "end_station_name", "end_station_id", "start_lat", "start_lng", "end_lat", "end_lng", "member_casual", "ride_duration_in_seconds", "ride_duration_in_hours")
+```
+
+And we'll drop start_coords and end_coords from cleaned_na
+
+```{r trim_down_cleaned_na_for_rbind}
+cleaned_na <- cleaned_na %>% select("ride_id", "rideable_type", "started_at", "ended_at", "start_station_name", "start_station_id", "end_station_name", "end_station_id", "start_lat", "start_lng", "end_lat", "end_lng", "member_casual", "ride_duration_in_seconds", "ride_duration_in_hours")
+```
+
+And finally, we'll merge the two data frames with rbind
+
+```{r rbind_cleaned_na_and_divvy_drop_na}
+divvy_cleaned <- rbind(cleaned_na, divvy_drop_na)
+```
+
+#### Transforming the data in preperation of analysis
+
+Great! Now we can start to transform the data for analysis. First, let's make a distance column to see how far each ride is, as the crow flies. We can use distHaversine from the geosphere package to do that.
+
+```{r create_distance_column}
+divvy_cleaned <- divvy_cleaned %>% 
+  mutate(ride_distance_in_meters = distHaversine(cbind(start_lng, start_lat), 
+                                  cbind(end_lng, end_lat)))
+```
+
+####### Let's make a column for a general time of the day, like morning afternoon, evening, and night. We'll define them as follows:
+
+* morning = 5am-12pm
+* afternoon = 12pm-5pm
+* evening = 5pm-9pm
+* night = 9pm-5am
+
+```{r create_ride_time_of_day}
+divvy_cleaned <- divvy_cleaned %>%
+  mutate(ride_time_of_day = case_when(
+    hour(started_at) >= 5 & hour(started_at) < 12 ~ "morning",
+    hour(started_at) >= 12 & hour(started_at) < 17 ~ "afternoon",
+    hour(started_at) >= 17 & hour(started_at) < 21 ~ "evening",
+    TRUE ~ "night"
+  ))
+```
+
+While we're at it, let's make a start_time column as well.
+
+```{r create_start_time}
+divvy_cleaned <- divvy_cleaned %>%
+  mutate(start_time = format(started_at, "%H:%M:%S"))
+```
+
+We'll also make an hour column and a minute column to be used later.
+
+```{r create hour and minute columns}
+divvy_cleaned$hour <- as.integer(format(divvy_cleaned$started_at, "%H"))
+divvy_cleaned$minute <- as.integer(format(divvy_cleaned$started_at, "%M"))
+```
+
+Let's also make a column displaying the day of the week in which the ride took place.
+
+```{r create_column_ride_day_of_week}
+divvy_cleaned <- divvy_cleaned %>%
+  mutate(ride_day_of_week = wday(started_at, label = TRUE, week_start = 1))
+```
+
+Let's see what stations have the most rides departing and arriving, and how long those rides typically were.
+```{r create_start_summary_for_station_names, echo=TRUE, eval=TRUE}
+start_summary <- divvy_cleaned %>%
+     group_by(start_station_name, member_casual) %>%
+     summarize(avg_duration_s = mean(ride_duration_in_seconds), 
+               avg_distance_m = mean(ride_distance_in_meters),
+               total_rides = n()) %>%
+  arrange(desc(total_rides)) %>%
+  head(10)
+start_summary %>% 
+    mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Summary of Average Ride Duration and Distance for Starting Stations", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+```{r create_end_summary_for_station_names, echo=TRUE, eval=TRUE}
+end_summary <- divvy_cleaned %>%
+     group_by(end_station_name, member_casual) %>%
+     summarize(avg_duration_s = mean(ride_duration_in_seconds), 
+               avg_distance_m = mean(ride_distance_in_meters),
+               total_rides = n()) %>%
+  arrange(desc(total_rides)) %>%
+  head(10)
+end_summary %>% 
+    mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Summary of Average Ride Duration and Distance for Ending Stations", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+let's see what kinds of rides members and casual users go for, and what kinds of bikes they use.
+
+```{r create_table_rides_bikes_and_member_types, echo=TRUE, eval=TRUE}
+rides_bikes_and_member_type <- divvy_cleaned %>%
+  group_by(rideable_type, member_casual) %>%
+  summarize(avg_ride_duration_in_seconds = mean(ride_duration_in_seconds),
+            avg_ride_distance_in_meters = mean(ride_distance_in_meters),
+            total_rides = n())
+rides_bikes_and_member_type %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Duration and Distance by Bike and Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Interesting. A cursory glance reveals that members tend to take rides lasting a shorter time, and more rides than casual riders. I'm also curious about this rideable_type, docked_bike. We'll investigate that a little further on. I believe that docked_bike is a mislabeled classic bike or an electric bike. Interesting that the error only showed up on casual bikes. For now, let's keep cleaning the data.
+
+I'm curious as to how weather and climate might affect riding behaviors of both casual riders and members. Let's incorporate some weather data into our data set.
+
+We'll be using Chicago weather information freely available from the Visual Crossing Corporation. Let's import that now, being careful to properly format the date.
+
+```{r import_chicago_weather_dataframe}
+Chicago_Il_2022_03_01_to_2023_02_28 <- read_csv("Chicago, Il 2022-03-01 to 2023-02-28.csv", 
+col_types = cols(datetime = col_date(format = "%Y-%m-%d")))
+```
+
+Now let's get a look at the available columns
+
+```{r chicago_weather_colnames}
+colnames(Chicago_Il_2022_03_01_to_2023_02_28)
+```
+
+Of these columns, I'm interested in "datetime", "tempmax", "tempmin", "temp", "feelslike", "humidity", "precip", "precipprob", "precipcover", "preciptype", "snow", "snowdepth", "windspeed", "cloudcover", "visibility", "uvindex", "conditions", and "description"
+
+Let's trim down our data frame.
+
+```{r trim_down_Chicago_Il_2022_03_01_to_2023_02_28}
+chicago_weather <- Chicago_Il_2022_03_01_to_2023_02_28 %>% select("datetime", "tempmax", "tempmin", "temp", "feelslike", "humidity", "precip", "precipprob", "precipcover", "preciptype", "snow", "snowdepth", "windspeed", "cloudcover", "visibility", "uvindex", "conditions", "description")
+```
+
+Now we'll need to create a date column in our divvy_cleaned data frame so that we can attach our weather data for each day. Let's create a column called start_date.
+
+```{r create_Start_date_column_from_started_at}
+divvy_cleaned <- divvy_cleaned %>%
+  mutate(start_date = as.Date(ymd_hms(started_at)))
+```
+
+While we're at it, let's add a season column. That could be useful later.
+```{r create_season_column}
+divvy_cleaned <- divvy_cleaned %>%
+  mutate(season = ifelse(month(start_date) %in% c(3, 4, 5), "Spring",
+                ifelse(month(start_date) %in% c(6, 7, 8), "Summer",
+                ifelse(month(start_date) %in% c(9, 10, 11), "Fall",
+                "Winter"))))
+```
+
+Now we'll do a left join to join the Chicago weather data to divvy_cleaned. We'll create a new data frame called divvy_with_weather
+
+```{r join_weather_data_to_divvy_cleaned_data_to_make_divvy_with_weather}
+divvy_with_weather <- divvy_cleaned %>%
+  left_join(chicago_weather, by = c("start_date" = "datetime"))
+```
+
+Before we begin our analysis, let's use season, time of day, and day of the week to try and figure out what kind of bike docked_bike is.
+
+```{r create_rides_per_time_of_day_bar_chart}
+divvy_cleaned %>%
+  ggplot(aes(x = factor(ride_time_of_day, levels = c("morning", "afternoon", "evening", "night")), fill = ride_time_of_day)) +
+  geom_bar() +
+  labs(title = "Rides per Time of the Day", x ="Time of the Day", y = "Number of Rides") +
+  theme_bw() +
+  ggeasy::easy_add_legend_title("Time of the Day") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+In rides per time of day, it closely matches with casual classic_bike and casual electric_bike. The differences are slight, but it can be see that in both casual classic_bike and casual docked_bike, morning has less than half as many rides as evening. casual electric_bike has slightly more than half.
+
+```{r create_rides_per_day_of_the_week_bar_chart}
+divvy_cleaned %>%
+  ggplot(aes(x = ride_day_of_week, fill = ride_day_of_week)) +
+  geom_bar() +
+  labs(title = "Rides per Day of the Week", x = "Day of the Week", y = "Number of Rides") +
+  theme_bw() +
+  ggeasy::easy_add_legend_title("Day of the Week") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+In rides per day of the week, again, it is similar to casual classic_bike and electric_bike, though the differences are more clear here, with Tuesday and Wednesday being the least popular days to ride fo casual classic bikes and casual docked bikes. I'm pretty sure it's a classic bike, but let's check out the seasonal data.
+
+```{r create_rides_per_season_bar_chart}
+divvy_cleaned %>%
+  ggplot(aes(x = factor(season, levels = c("Spring", "Summer", "Fall", "Winter")), fill = season)) +
+  geom_bar() +
+  labs(title = "Rides per Season", x ="Season", y = "Number of Rides") +
+  theme_bw() +
+  scale_fill_manual(values = c("Spring" = "green", "Summer" = "yellow", "Fall" = "orange", "Winter" = "cyan")) +
+  ggeasy::easy_add_legend_title("Season") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+In rides per season, we can clearly see that casual electric bikes have fall being more popular than spring by a bit, whereas casual classic bikes and casual docked bikes have spring being very slightly more popular than fall. I'm convinced that docked bikes are classic bikes. Given that the docked_bike rideable type only shows up in casual riders, I believe it must be some sort of data error.
+
+Let's fix that now.
+
+```{r change_docked_bike_to_classic_bike_in_divvy_cleaned}
+divvy_cleaned <- divvy_cleaned %>%
+  mutate(rideable_type = ifelse(rideable_type == "docked_bike", "classic_bike", rideable_type))
+```
+```{r change_docked_bike_to_classic_bike_in_divvy_with_weather}
+divvy_with_weather <- divvy_with_weather %>%
+  mutate(rideable_type = ifelse(rideable_type == "docked_bike", "classic_bike", rideable_type))
+```
+
+
+## Analysis
+
+Now it's time to dig in to the data. I'm wondering if there's a difference in riding habit by season for members vs casual riders. Perhaps with a membership, members take more rides in the summer for fun, since they've already payed for all their rides for the year. Let's check that out with a graph.
+
+```{r rides_per_season_by_member_type_bar_graph}
+ggplot(divvy_cleaned, aes(x = factor(season, levels = c("Spring", "Summer", "Fall", "Winter")), fill = season)) + 
+  geom_bar() + 
+  labs(title = "Number of Rides per Season", x = "Season", y = "Number of Rides") +
+  facet_wrap(~member_casual) +
+  scale_fill_manual(values = c("Spring" = "green", "Summer" = "yellow", "Fall" = "orange", "Winter" = "cyan")) +
+  theme_bw() +
+  scale_y_continuous(labels = comma)
+```
+
+Interesting. It seems summer is the most popular season by far, though members and casuals take a very similar number of rides.. What's also interesting, is that members take far more rides in the other three seasons than the casual riders. I assume this is because bike riding is less apealing in those months, than it is in the summer, but because annual members have already payed for their rides, they tend to take more rides throughout the year, even if it isn't summer.
+
+I'm wondering what aspect weather conditions might have on these rides. let's check it out.
+
+```{r graph_of_rides_per_weather_conditions_for_casual_vs_member}
+ggplot(divvy_with_weather, aes(x = conditions, fill = conditions)) +
+  geom_bar() +
+  labs(title = "Number of Rides per Weather Condition", x = "Weather Condition", y = "Number of Rides") +
+  facet_wrap(~member_casual) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = "none") +
+  scale_y_continuous(labels = comma)
+```
+
+Wow! That's very telling! of the various weather conditions, the vast majority of the rides are under partially cloudy conditions, but I wonder what percentage is partially cloudy? Let's make a table to check out the percent of each condition per member type.
+
+```{r create_table_with_percent_per_condition_per_member_type}
+percent_per_condition_per_member_type <- divvy_with_weather %>%
+  count(conditions, member_casual) %>%
+  group_by(member_casual) %>%
+  mutate(total_rides = sum(n)) %>%
+  ungroup() %>%
+  mutate(percentage = n/total_rides*100) %>%
+  select(conditions, member_casual, percentage) %>%
+  pivot_wider(names_from = member_casual, values_from = percentage) %>%
+  arrange(desc(`casual`))
+
+percent_per_condition_per_member_type %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Rides per Weather Condition Percent per Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Now I'm wondering, is that just because most days are partly cloudy? Let's check out our weather data real quick. We'll make another bar chart.
+
+```{r graph_of_days_of_the_year_per_weather_conditions_in_Chicago}
+ggplot(Chicago_Il_2022_03_01_to_2023_02_28, aes(x = conditions, fill = conditions)) +
+  geom_bar() +
+  labs(title = "Days of the year per Weather Condition", x = "Weather Condition", y = "Number of Days in the Year") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = "none") +
+  scale_y_continuous(labels = comma)
+```
+
+Interesting, Now let's look at the percent of the year for each condition.
+
+```{r create_table_with_percent_weather_condition_in_chicago}
+percent_weather_condition_in_chicago <- Chicago_Il_2022_03_01_to_2023_02_28 %>%
+  count(conditions) %>%
+  mutate(percent = n/365*100)
+
+percent_weather_condition_in_chicago %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Percent of Days per Weather Condition in Chicago", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Let's combine this tibble with the previous one using a left join to get a better look.
+
+```{r join_percent_weather_condition_in_chicago_with_percent_per_condition_per_member_type}
+joined_percent_table <- left_join(percent_per_condition_per_member_type, percent_weather_condition_in_chicago)
+joined_percent_table <- joined_percent_table %>% mutate (expected_percent = percent)
+joined_percent_table <- joined_percent_table %>% select(conditions, expected_percent, casual, member)
+
+joined_percent_table %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Percent Days per Weather Condition and Percent Rides Per Weather Condition per Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+**Note:** expected_percent refers to the percent of days in our year that these conditions occured. members refers to the percent of member rides with these conditions, and casual refers to the percent of casual rides with these weather conditions. n is number of days in the year and can be ignored.
+
+okay, the values are fairly different, but what exactly is the difference? Let's create a new table showing the difference in percent.
+
+
+```{r create_conditions_percent_diff_table}
+conditions_percent_diff <- joined_percent_table %>% 
+  mutate(percent_diff_in_casual_riders = casual - expected_percent, 
+         percent_diff_in_members = member - expected_percent) %>% 
+  select(conditions, percent_diff_in_casual_riders, percent_diff_in_members)
+
+conditions_percent_diff %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Percent Difference Between Expected and Actual Ride Percent per Weather Condition by Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Interesting. It seems like some weather conditions do play a part in whether or not riders decide to ride that day, though it seems weather affects the decision for casual members more so than it does for annual members. Perhaps it's because they don't want to pay for a ride if the weather is unfavorable, whereas the annual members already payed, so they don't mind.
+
+Seeing as Partially Cloudy seems to be the most favored condition, let’s create a small data set around that.
+
+We’ll filter for days in which conditions are partially cloudy and extract and count the months
+
+```{r filter_for_days_that_are_partially_cloudy_and_count_months}
+partially_cloudy <- filter(Chicago_Il_2022_03_01_to_2023_02_28, conditions == "Partially cloudy")
+
+p_cloudy_count <- partially_cloudy %>%
+  mutate(month = month(datetime, label = TRUE)) %>%
+  group_by(month) %>%
+  summarise(count = n()) %>% 
+  arrange(desc(count))
+
+p_cloudy_count %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Partially Cloudy Days per Month", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Interesting, now I wonder how well these months actually perform. Let’s take a quick look at that.
+
+```{r calc_how_well_p_cloudy_months_permorm}
+ride_per_month_count <- divvy_cleaned %>% 
+  mutate(month = month(started_at, label = TRUE)) %>%
+  group_by(month) %>%
+  summarise(count = n()) %>% 
+  arrange(desc(count))
+
+ride_per_month_count %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Number of Rides per Month", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Okay, we see that the summer months perform the best, that’s to be expected from our rides per season graph. Maybe we’d see something else if we used a larger data set for our first table. The most I can get for free is an additional 2 years of data, so let’s add that to our data set and see if that changes anything.
+
+```{r add_2_years_of_weather_data}
+chicago_2020_03_01_to_2022_02_28 <- read_csv("chicago 2020-03-01 to 2022-02-28.csv", 
+  col_types = cols(datetime = col_date(format = "%Y-%m-%d")))
+```
+
+This data set contains only the conditions column and the datetime column. Let’s combine it with our other Chicago weather data.
+
+```{r combine_new_and_old_weather_data}
+Chi_weather_conditions_2022_to_2023 <- Chicago_Il_2022_03_01_to_2023_02_28 %>% 
+  select(datetime, conditions)
+
+Chi_weather_conditions_2020_to_2023 <- rbind(chicago_2020_03_01_to_2022_02_28, Chi_weather_conditions_2022_to_2023)
+```
+
+Now let's do that count again with this new data set.
+
+```{r count_weather_data_again_with_new_data}
+new_p_cloudy_count <- Chi_weather_conditions_2020_to_2023 %>%
+  filter(conditions == "Partially cloudy") %>% 
+  mutate(month = month(datetime, label = TRUE)) %>%
+  group_by(month) %>%
+  summarise(count = n()) %>% 
+  arrange(desc(count))
+  
+new_p_cloudy_count %>%
+  ggplot(aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  labs(title = "Partially Cloudy Days in a 3 Year Period by Month", x = "Month", y = "Number of Days") +
+  scale_y_continuous(labels = comma)
+```
+
+Now let’s compare it to our ride_per_month_count
+
+```{r compare_to_ride_per_month_count}
+ride_per_month_count %>%
+  ggplot(aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  labs(title = "Rides per Month", x = "Month", y = "Number of Rides") +
+  scale_y_continuous(labels = comma)
+```
+```{rcomp_r_p_m_kables}
+new_p_cloudy_count %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Partially Cloudy Days per Month over Three Years", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+ride_per_month_count %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Number of Rides per Month", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+This definitely gives us a better insight into which months have the most partially cloudy days, and by comparing the two tables, we can see that, while November has the most partially cloudy days over the last 3 years, and July has the third most partially cloudy days, more rides take place in July, with it being the number one month on the rides per month table, while November falls into 8th place. Perhaps Partially Cloudy isn’t as favorable if it’s not in Summer.
+
+For now, let's focus on our project goals: as a reminder,
+
+####### The goals of this project are to determine:
+
+* how annual Cyclistic members use bikes differently than casual bikers
+* for what reasons casual riders would buy an annual membership
+* how Cyclistic can use marketing strategies centered around digital media to 
+influence Casual riders into becoming annual members
+
+So we've already seen how weather impacts casual and member riders differently. let's further investigate how annual Cyclistic members use bikes differently than casual bikers.
+
+Let's compare the average ride duration and distance between annual members and casual riders
+
+```{r find_avg_distance_and_duration_based_on_member_type}
+avg_duration <- divvy_cleaned %>%
+  group_by(member_casual) %>%
+  summarize(avg_duration_s = mean(ride_duration_in_seconds))
+
+avg_distance <- divvy_cleaned %>%
+  group_by(member_casual) %>%
+  summarize(avg_distance_m = mean(ride_distance_in_meters))
+
+avg_duration %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds per Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+avg_distance %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Distance in Meters per Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+
+Interesting, the average duration is much longer for casual riders, 82.903% longer, but the average distance for casual riders is only 3.09636% longer. With such a big difference in duration, you'd expect casual ride distances to have a bigger average. Perhaps, members are taking more one-way bike rides, while casuals are going for tourist-style rides around, and ending where they started. After all, the distance metric only tracks distance as the crow flies, so if a casual rider takes a ride around town, seeing the sights, but ends up near or where they started, the 'distance' will be much shorter than their total distance traveled.
+
+Let's check that out by filtering for start_Station_ids that match end_station_ids and group by casual_member
+```{r create_same_start_and_end_stations}
+same_start_and_end_stations <- divvy_cleaned %>%
+  group_by(member_casual) %>%
+  filter(start_station_id == end_station_id) %>%
+  summarise(total_rides = n())
+
+same_start_and_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Number of Rides with the Same Start and End Station per Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+As we guessed, casual riders had 70.1964% more 'round trips' (in which they started and ended at the same station) than annual members. These are probably tourists, or people riding the bikes for exercise or site-seeing.
+
+I'd love to be able to further explore this. I'm curious about the demographics of casual riders and members taking these round trips. Do they live in Chicago? What age are they? What income level are they in? We don't have access to this type of data, but it might be worth investigating in the future.
+
+For now, let's examine differences in ride frequency and patterns. Let's take a closer look at differences between the two groups related to time of day, day of the week, and season of the ride. We'll also compare them by bike types.
+
+#### Time of Day of the Ride
+
+```{r create_rides_per_time_of_day_bar_chart2}
+divvy_cleaned %>%
+  ggplot(aes(x = factor(ride_time_of_day, levels = c("morning", "afternoon", "evening", "night")), fill = ride_time_of_day)) +
+  geom_bar() +
+  labs(title = "Rides per Time of the Day", x ="Time of the Day", y = "Number of Rides", caption = "Note: Morning has been defined as 5am-12pm, afternoon has been defined as 12pm-5pm, 
+       evening has been defined as 5pm-9pm, and night has been defined as 9pm-5am.") +
+  theme_bw() +
+  ggeasy::easy_add_legend_title("Time of the Day") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+Let us remember that morning has been defined as 5am-12pm, afternoon has been defined as 12pm-5pm, evening has been defined as 5pm-9pm, and night has been defined as 9pm-5am. Afternoon is the most popular time to bike for all groups, though the relationship is most pronounced in casual riders. It is also worth noting that members seem to ride throughout the entire day fairly consistently, with night having far less rides taking place. Perhaps these boosted morning and evening members rides has to do with members using the bikes to commute to work. If so, we may see spikes in number of rides for members around rush hour. Perhaps we'd do well to create another graph using a more specific time of day.
+
+Let's do that now.
+
+```{r create_rides_by_start_time_scatter_plot}
+divvy_cleaned$minutes_since_midnight <- divvy_cleaned$hour * 60 + divvy_cleaned$minute
+
+ggplot(divvy_cleaned, aes(x = minutes_since_midnight, y = ..count..)) +
+  geom_point(stat = "count") +
+  labs(title = "Rides per Minute in a Day",
+       x = "Time of Day (hour:minute)",
+       y = "Number of Rides") +
+  scale_x_continuous(
+    labels = function(x) format(as.POSIXct(x * 60, origin = as.POSIXct("1970-01-01")), "%H:%M"),
+    breaks = seq(0, 23*60, by = 60)
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = "none") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+Here we can clearly see differing trends between casual riders and members. There are two clear peaks for members around rush hour. Because these two peaks coincide with rush hour so well, this leads me to believe that significantly more members are using their bikes to commute to and from work than casual members. Let's take this same graph and do a facet wrap around ride_day_of_week to see if this is a week day trend or if it occurs every day of the week.
+
+```{r create_rides_by_memcas_start_time_and_day_of_week_scatter_plot}
+divvy_cleaned$minutes_since_midnight <- divvy_cleaned$hour * 60 + divvy_cleaned$minute
+
+memcas_time_day_rides_plot <- ggplot(divvy_cleaned, aes(x = minutes_since_midnight, y = ..count..)) +
+  geom_point(stat = "count") +
+  labs(title = "Rides per Minute in a Day",
+       x = "Time of Day (hour:minute)",
+       y = "Number of Rides") +
+  scale_x_continuous(
+    labels = function(x) format(as.POSIXct(x * 60, origin = as.POSIXct("1970-01-01")), "%H:%M"),
+    breaks = seq(0, 23*60, by = 60)
+  ) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 6)) +
+  guides(fill = "none") +
+  facet_wrap(ride_day_of_week~rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+
+ggsave("memcas_time_day_rides_plot.png", plot = memcas_time_day_rides_plot, width = 8, height = 10, dpi = 300)
+
+knitr::include_graphics("memcas_time_day_rides_plot.png")
+```
+
+As we assumed, we can see that the two rush hour peaks from the previous graphs can be seen on weekdays for member riders, but not on weekends. Furthermore, we can see a slight peak in the number of rides between noon and 1:00 pm on weekdays, presumably people going to lunch on their work day. 
+
+Let's take a step back and get a look at the rides per day for casual_member and rideable_type.
+
+#### Day of the Week of the Ride
+
+```{r create_rides_per_day_of_the_week_bar_chart2}
+divvy_cleaned %>%
+  ggplot(aes(x = ride_day_of_week, fill = ride_day_of_week)) +
+  geom_bar() +
+  labs(title = "Rides per Day of the Week", x = "Day of the Week", y = "Number of Rides") +
+  theme_bw() +
+  ggeasy::easy_add_legend_title("Day of the Week") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+From these graphs we can see a clear difference in riding behavior from casual riders vs members. Casual riders typically take more rides on the weekend, while members take more rides during the week. This is corroborated by the previous findings that
+suggest a significant number of members are using Cyclistic bikes to commute to and from work (and to get lunch on their work breaks). Furthermore, it also suggests that casual rides are using the bikes for leisurely rides on the weekends, which is corroborated by their pattern of taking more round trips with their bikes in which they end their r ide where they started it.
+
+#### Season of the Ride
+
+```{r create_rides_per_season_bar_chart2}
+divvy_cleaned %>%
+  ggplot(aes(x = factor(season, levels = c("Spring", "Summer", "Fall", "Winter")), fill = season)) +
+  geom_bar() +
+  labs(title = "Rides per Season", x ="Season", y = "Number of Rides") +
+  theme_bw() +
+  scale_fill_manual(values = c("Spring" = "green", "Summer" = "yellow", "Fall" = "orange", "Winter" = "cyan")) +
+  ggeasy::easy_add_legend_title("Season") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+It seems that members and casual riders both seem to prefer taking bike rides in the summer. There are also some differences in their riding habits based on whether they are casual riders or annual members, as well as whether they are riding electric bikes or classic bikes. Casual riders take much fewer rides in the winter, perhaps because they do not view it as worth the price to rent the bike solely for winter. However, member riders take winter rides only half as much as they take spring rides. While it is still they least popular month, it is not by so wide a margin as it is for casual riders.
+
+As far as electric bikes go, there are yet more differences within and between the two groups of riders. casual riders ride more classic bikes than they do electric bikes, as do members. However, during the fall, casual riders ride more electric bikes than classic bikes. The same is true for casual winter riders. The groups of casual fall riders and casual winter riders are the only groups that ride more electric bikes than casual bikes. Perhaps this has something to do with the temperature, or maybe even the holiday season.
+
+Another noteworthy observation is the distribution of members electric bike riders. While members seem to prefer the classic bike to the electric bike in every season, the number of riders for each season is much closer to each other season for electric bike riders than it is for classic bike riders. The amount of members electric rides in the summer is strikingly less than the amount of classic bike rides. Perhaps these are members who want to get some exercise while the temperature is higher?
+
+#### Rides per Temperature (°F)
+
+```{r create_rides_per_temp_scatterplot}
+ggplot(divvy_with_weather, aes(x = temp, y = ..count..)) +
+  geom_point(stat = "count") +
+  labs(title = "Rides per Temperature",
+       x = "Temperature (Fahrenheit)",
+       y = "Number of Rides") +
+  scale_x_continuous(
+    labels = function(x) paste0(x, "°F"),
+    breaks = seq(min(divvy_with_weather$temp), max(divvy_with_weather$temp), by = 5)
+  ) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = "none") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+
+Looking at these graphs reveals a bit of what we already expected, but also sheds light on some new revelations. In all graphs, the temperature with the highest number of rides is close to 75 degrees Fahrenheit past that temperature and the number of rides per temperature starts to fall off. The classic bikes of both the casual and members has a higher number of rides at its peak than their electric bike counterparts. This is to be expected seeing that the classic bike has always been more popular.
+
+What’s interesting is the left side of the scatter plot. Low temperatures for casual riders have very few rides per each low temperature. This can be seen by how closely together each point is, with each point below 20 degrees being close to zero. The members display a similar trend, though a close look reveals that their lower temperatures have outliers in which low temperatures have slightly more rides per temperature. This trend continues as the temperature increases and becomes more apparent when we reach 35 degrees Fahrenheit. At this point the difference between casual and member riders becomes apparent. It seems that, at least at lower temperatures, temperature has less of an effect on annual members than it does on casual riders.
+
+The overall trend for each graph is that as the temperature increases, the number of rides increases, though each graph also shows that 75 degrees seems to be the most popular temperature to ride at, and while higher temperatures are still very popular temperatures to ride at, once the temperature goes beyond 75 degrees Fahrenheit, people tend to take less rides.
+
+I’m also curious about what stations are most used by annual members and casual riders. Let’s check that out next!
+
+First, we’ll subset the data frame for annual and casual members
+
+```{r subset_station_pop_by_mem_type}
+annual_members <- divvy_cleaned %>% 
+  filter(member_casual == "member")
+
+casual_riders <- divvy_cleaned %>% 
+  filter(member_casual == "casual")
+```
+
+Now we can create tables for the top start and end stations for annual members and casual riders.
+
+```{r create_kables_for_top_start_and_end_stations_by_mem_type}
+annual_start_stations <- annual_members %>% 
+  group_by(start_station_name) %>% 
+  summarize(num_rides = n()) %>% 
+  top_n(10, num_rides) %>% 
+  arrange(desc(num_rides))
+
+annual_end_stations <- annual_members %>% 
+  group_by(end_station_name) %>% 
+  summarize(num_rides = n()) %>% 
+  top_n(10, num_rides) %>% 
+  arrange(desc(num_rides))
+
+casual_start_stations <- casual_riders %>% 
+  group_by(start_station_name) %>% 
+  summarize(num_rides = n()) %>% 
+  top_n(10, num_rides) %>% 
+  arrange(desc(num_rides))
+
+casual_end_stations <- casual_riders %>% 
+  group_by(end_station_name) %>% 
+  summarize(num_rides = n()) %>% 
+  top_n(10, num_rides) %>% 
+  arrange(desc(num_rides))
+```
+
+Let’s check out our new tables.
+
+```{r view_kables_for_top_start_and_end_stations_by_mem_type}
+annual_start_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+annual_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+casual_start_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+casual_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 End Stations for Casual Riders", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+Very interesting results here. For one thing, it’s interesting that the annual members top 10 are all within a range of under 7,000 ride counts of one another, while casual riders top 10 are within a range of more than 42,000 rides, the largest gap being between the most and second most popular station for casual riders; Streeter Dr & Grand Ave.
+
+##### Let’s take a look at this station, and other stations popular with casual riders.
+
+* Streeter Dr & Grand Ave is located near Navy Pier, one of the top tourist attractions in Chicago. It has various restaurants, shops, and entertainment options such as the Chicago Shakespeare Theater and the Chicago Children’s Museum.
+* DuSable Lake Shore Dr & Monroe St is located near Grant Park, a large urban park in downtown Chicago, that has various attractions including the Art Institute of Chicago, Buckingham Fountain, and the Museum Campus, which contains the Field Museum, the Shedd Aquarium, and the Adler Planetarium.
+* Millennium Park is widely popular, being home to the Cloud Gate sculpture (known as “The Bean”) and the Crown Fountain. It also holds several outdoor concerts and events throughout the year.
+* Michigan Ave & Oak ST is located near the Magnificent Mile, a popular shopping district in Chicago, containing various luxury retailers, restaurants, and department stores. It is also close to the historic Water Tower, one of the few buildings that survived the Great Chicago Fire of 1871.
+
+##### Let’s also check out some of the stations that are popular with annual members.
+
+* Kingsbury St & Kinzie St is located within the River North neighborhood, known for ‘trendy’ restaurants, art galleries, and a nightlife. It’s also close to the Merchandise Mart, the world’s largest commercial building, which houses various showrooms and offices.
+* Clark St & Elm St is located withing the Gold Coast neighborhood, known for it’s luxury shopping, historic mansions, and beautiful architecture. It is also close to Lincoln Park, the largest park in Chicago, which contains the Lincoln Park Zoo and the Lincoln Park Conservatory.
+* Wells St & Concord Ln is located within the Old Town neighborhood, known for historic architecture, theaters, and charming shops. It is also close to Second City comedy club, a well known comedy club famous for launching the careers of many famous comedians.
+* Clinton St & Washington Blvd is located within the West Loop neighborhood, with a thriving nightlife, popular restaurants, and art galleries. It is also near the United Center, home of the Chicago Bulls and the Blackhawks.
+
+While both contain places that visitors to Chicago might like to see, the casual riders seem to be visiting more typical tourist locations, such as the Navy Pier, Millennium Park, and the Shedd Aquarium. Annual members are visiting places with thriving nightlife activities, neighborhoods, and places like the Merchandise Mart, the world largest commercial building, possibly as part of their commute to and/or from work.
+
+Earlier we looked at bike ride duration and distance based on member type. Now I’m curious how bike type plays a roll in the behavior of the rider across membership types. Let’s make a couple new tables to check that out now
+
+```{r create_and_view_kables_for_bike_type_duration_and_distance}
+avg_duration_per_rideable_type <- divvy_cleaned %>%
+  group_by(member_casual, rideable_type) %>%
+  summarize(avg_duration_s = mean(ride_duration_in_seconds))
+
+avg_distance_per_rideable_type <- divvy_cleaned %>%
+  group_by(member_casual, rideable_type) %>%
+  summarize(avg_distance_m = mean(ride_distance_in_meters))
+
+avg_duration_per_rideable_type %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds per Rideable Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+avg_distance_per_rideable_type %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+The first thing I noticed from these tables is that casual and member riders ride the electric bike for less time than the classic bike, but also for farther distances than the classic bike. This leads me to believe that more riders tend to ride the electric bikes to get to places than they do the classic bike. This also suggests that the classic bikes are rode more often for the pleasure of riding, or for exercise, than the electric bikes are. The difference in duration is much more extreme for casual riders than it is for annual members. That could imply that members are using electric bikes for leisurely rides more than casual riders. It could also mean that casual riders are going significantly faster on electric bikes than members.
+
+We could investigate this by seeing if members are making more round-trips on electric bikes than casual members are. Let’s check that out now.
+
+```{r investigate_round_trips_by_mem_and_bike_type}
+same_start_and_end_stations <- divvy_cleaned %>%
+  group_by(member_casual, rideable_type) %>%
+  filter(start_station_id == end_station_id) %>%
+  summarise(total_rides = n()) %>%
+    rename("Bike Style" = rideable_type,
+         "Membership Type" = member_casual,
+         "Number of Rides" = total_rides)
+
+same_start_and_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Nubmer of Rides with the Same Start and End Stations by Member and Bike Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+45.67% of members round trips are on electric bikes 39.21% of casual round trips are on electric bikes
+
+Okay, so there is a slight preference for round-trips on electric bikes for members when compared to casual riders. So it might be that members are using them more for sight seeing and fun, rather than just to get from point A to point B. We’ll keep that in mind.
+
+Now let’s have another look at part two of our business task.
+
+#### **For what reasons would casual riders buy an annual membership?**
+
+A casual rider who uses Cyclistic bikes frequently may find that an annual membership is more cost-effective than paying to use a bike every time they want to go for a ride. We could market the cost savings of an annual membership compared to a number of bike rides.
+
+According to divvybikes.com, (divvy being the data source for which the fictional company of Cyclistic is based off of)a single ride cost 1 dollar to unlock, and 17 cents per minute of riding. A day pass, allowing unlimited 3-hour rides withing a 24 hour period costs 16 dollars and 50 cents for that day. An annual pass allows for unlimited 45 minute rides at a price of 11 dollars a month, billed upfront annually at a price of 130 dollars and 90 cents.
+
+```{r quick_maffs_1}
+print(130.90/16.50)
+```
+
+We could advertise that the annual pass costs less than the cost of 8 days of biking, and that if you think you’ll ride a bike more than 7 times in a year (buy a day pass more than 7 times a year), you’d be saving money by signing up for the annual pass. Of course this is assuming that the rider would be buying the day pass. if they instead plan to pay by single rides, we can calculate the average length of a ride and use that to determine the average price per ride.
+
+```{r create_and_view_avg_bike_duration_kabble}
+avg_duration <- divvy_cleaned %>%
+  summarize(avg_duration_s = mean(ride_duration_in_seconds))
+
+avg_duration %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+```{r quick_maffs_2}
+(1000.901 / 60)
+```
+
+According to the website, “All per minute ride prices are rounded up to the nearest minute.” so we’ll call it 17 minutes
+
+```{r quick_maffs_3}
+(17 * 0.17) + 1
+#plus one for the cost to unlock the bike
+```
+
+That gives us 3 dollars and 89 cents being the average price of a ride, assuming the ride is bought by a non-member. 130.90 divided by 3.89 gives us ~33.65 rides until the annual membership is worth it. A perhaps more persuasive way to say that could be ((33.65 x 17) / 60 = 9.53) if you plan to ride a bike for more than 9.53 hours in a year, you should get the annual pass.
+
+Furthermore, we can say that you should plan to ride a bike for more than nine and a half hours. [BetterHealth.vic.gov](https://www.betterhealth.vic.gov.au/health/healthyliving/cycling-health-benefits) recommends cycling for at least two to four hours a week to achieve a general improvement to your health, and cites such health benefits as protecting against serious diseases such as stroke, heart attack, some cancers, depression, diabetes, obesity, and arthritis. Regular cycling also increases cardiovascular fitness, muscle strength and flexibility, improved joint mobility, decreased stress levels, improved posture and coordination, strengthened bones, decreased body fat levels, prevention or management of disease, and reduced anxiety and depression. Furthermore, they point out that cycling is low impact, a good muscle workout, easy, good for training strength and stamina, as intense as you want, a fun way to get fit, and time-efficient. References are available at the bottom of this government health page if needed.
+
+[The University of Montana](https://www.umt.edu/transportation/bike/about/benefits/) also points out the same health benefits, as well as taking a focus on the environmental and ecological benefits of regular cycling. They talk about how 60% of pollutants created from motorized transportation are produced within the first few minutes of the ride, and that if everyone who lived within 5 miles of their work, instead rode a bike to work, it would reduce greenhouse-gas emissions by 5 million tons a year and save more than 24 billion gallons of gas. They also point out that someone riding a bike can go 960 miles on the same amount of energy that would move a car 20 miles. They also talk about how bicycles reduce the need to clear land for parking lots, and for every one parking space, between 6 and 15 bikes can easily fit that space. Furthermore, because bikes use much less rubber and lubricants than things like cars and buses, increased bicycle use can also help to combat deforestation. To quote the website directly, “14,000 pounds of carbon are produced in the manufacture of each motor vehicle. By comparison, a graduate student at MIT recently estimated that manufacturing an average bicycle results in the emission of approximately 530 pounds of greenhouse gases.”
+
+So quite easily, the argument can be made that by buying the annual membership, members gain access to a fun, pleasurable, convenient, and easy way to greatly improve their health, their physical and mental well being, and the well being of the planet’s wildlife, as well as reducing our dependency on fossil fuels, helping to combat the effects of climate change, and cut down on the expulsion of greenhouse gasses entering our atmosphere.
+
+If we were so inclined, we could also set aside a small portion of profits (something like 3-5% of net profit from each membership) to helping with some cause, such as global poverty, animal welfare, ending hunger, reducing homelessness, or improving education. This coupled with the environmental, economic, and ecological advantages outlined earlier would make Cyclistic that much more attractive to someone who is unsure if 130.90 dollars annually is really worth it. They can get a sense of helping the world while also helping themselves to be happier and healthier.
+
+Cyclistic might consider adding functionality to their app, like the ability to share and compare ride stats with friends, send messages, and include a newsletter about local Cyclistic users and/or the benefits of regular cycling. Furthermore, the app could be used to promote events in which Cyclistic members can meet up and go for scheduled group rides around iconic locations in Chicago together. This could foster a sense of community within the Cyclistic annual members, and offer a social advantage to being a member of Cyclistic. It would be important to ensure that these events are safe and to make it clear that Cyclistic encourages individuals to exercise caution and remain aware of their surroundings, and that Cyclistic holds no liability in the event of anything going wrong during a community event.
+
+We can also reference the ease of access for annual riders, who don’t need to spend time or mental energy going through the process of paying for their ride. *Pay once, ride all year!* This could be especially nice for those who use Cyclistic bikes to commute to work.
+
+Some riders may be hesitant to commit to an annual membership, even if they understand the above benefits. Cyclistic could consider offering a trial membership at a lower cost. perhaps a one month trial membership that can only be bought once on each account, charging something like 11 dollars a month. Many tourists use Cyclistic as casual riders. Perhaps, to avoid allowing them to take advantage of the month trial, we could make it only available to casual riders after they have completed a predetermined number of rides. We could make the one month trial only available to them to buy for a short amount of time, like for the next 48 hours after unlocking. This should create a sense of urgency and encourage them to give the membership a try. We know that members bike more often than casual riders, as a result, these trial members should find themselves getting more use out of the bikes now that they don’t have to pay every time they ride, helping them see the benefits of being an annual member.
+
+I’ve noticed that there are some niche situations in which annual members may need to spend money on bike riding. For example, annual membership comes with unlimited 45 minute rides. However, if they wanted to take a longer ride, they’d have to either stop at a station and start a new ride, or else they could purchase a single ride, which costs 1 dollar and for non-members has a 17 cents per minute cost. This 17 cents is waived for members, meaning a single ride of any length would cost 1 dollar. There is also the cost of riding an electric bike. 1 dollar to unlock and 42 cents per minute for casual riders, or 17 cents a minute for annual members. perhaps we could offer a rewards program for annual members in which they unlock a certain amount of credits that can only be used on these niche cases (not for their membership) perhaps they would earn points for cycling at least 30 minutes a day for 5 consecutive days. A rewards program might incentive non members to become members for fear of “missing out” on their reward points. If Cyclistic is reluctant to allow annual members to be able to use the points to unlock the bikes, the reward could be minutes (eMinutes?) accrued that could be used for riding the electric bikes. perhaps 5 minutes for 5 days of consecutive bike riding, or something similar.
+
+#### Now let’s take a look at the third aspect of our business goal: 
+
+#### **How can Cyclistic use marketing strategies centered around digital media to influence Casual riders into becoming annual members**
+
+As touched on in the previous section, we could incentivize casual riders to become annual members by further developing the app by adding optional social media elements such as friends, groups, messaging (even if only within groups or on group bulletin boards), shareable progress such as distance biked and number of rides, and community events. We can offer exclusive rewards programs for annual members within the app, such as redeemable minutes for ebikes or small loyalty based discounts on renewed annual memberships. This will create a sense of exclusivity and urgency for frequent casual users, encouraging them to become annual members.
+
+We can work with the Cyclistic team to develop a targeted email marketing campaign that leverages user data obtained from the app to identify trends among casual riders. For instance, we can look at which start and end stations are most frequently used by casual riders, and use this information to create personalized email campaigns that highlight these popular routes and incentivize riders to become annual members. By using the usernames or IDs of individual riders, we can further tailor the emails to their specific riding patterns and behaviors. This targeted approach can be a powerful tool for converting casual riders into annual members, and we can work with the Cyclistic team to test and refine different email campaigns to optimize their effectiveness.
+
+To further encourage casual riders to become annual members, Cyclistic could also create engaging social media content that showcases the benefits of annual membership, such as getting fit, cheap and fun commutes to work while skipping the traffic, and cutting back on pollution. This content could be visually appealing and posted on platforms like Instagram, YouTube, Twitter, and Facebook. Cyclistic could use targeted advertising to reach specific demographics and geographic locations that are most likely to convert to annual members. For example, if data shows that college students are frequent casual riders, Cyclistic could target Instagram ads to college campuses and use language and visuals that appeal to that demographic. Additionally, Cyclistic could use social media influencers or brand ambassadors to promote annual membership and showcase the benefits to their followers. By leveraging the power of social media and targeted advertising, Cyclistic can reach a wider audience and potentially convert more casual riders into annual members.
+
+Cyclistic could use social media to offer limited-time promotions, such as discounted annual memberships during periods when subscription rates are typically lower. By analyzing subscription data and identifying times when sign-ups are historically lower, Cyclistic can strategically offer promotions during those periods to encourage more casual riders to become annual members. Additionally, incentivizing riders with minutes or discounts to refer friends to sign up for annual memberships could also help increase membership numbers. These promotional offers and referral incentives could create a sense of urgency among casual riders, and motivate them to become annual members and spread the word to others.
+
+Cyclistic could collaborate with social media influencers who align with the brand’s values and target demographic, such as Chicago-based fitness and lifestyle influencers. Influencers like @chicagofoodauthority on Instagram, @ChicagoParent on Twitter, and Luis Gusto (@GoLuisGusto) on YouTube could be ideal partners to promote annual memberships to their followers. For example, @chicagofoodauthority could showcase how cycling is a healthy and fun way to explore Chicago’s food scene, while @ChicagoParent could highlight how annual memberships can make family outings more affordable and eco-friendly. Luis Gusto could create YouTube content featuring the benefits of cycling for fitness and transportation, and encourage his followers to become annual members. Collaborative efforts with these influencers could include sponsored posts or videos, influencer takeovers of Cyclistic’s social media accounts, or other promotional activities. By partnering with relevant influencers, Cyclistic can reach a wider audience and promote the benefits of becoming an annual member to potential customers.
+
+Cyclistic could tap into the power of customer reviews and testimonials by encouraging annual members to share their experiences on social media and other review platforms. By showcasing positive reviews and testimonials in digital marketing efforts, Cyclistic can demonstrate the benefits of becoming an annual member to potential customers. This approach could include creating shareable graphics that feature testimonials or incorporating snippets of positive reviews in social media posts and targeted ads. Additionally, Cyclistic could incentivize annual members to share their experiences by offering rewards or recognition for their participation. Leveraging customer reviews and testimonials can help build trust with potential customers and persuade them to become annual members.
+
+Measuring the effectiveness of digital marketing campaigns is crucial for understanding what works and what needs improvement. Cyclistic should track key metrics such as website traffic, email open rates, and social media engagement to gauge the success of their campaigns. With this information, Cyclistic can identify trends and adjust their marketing strategies accordingly to improve engagement and conversion rates. By optimizing campaigns for maximum impact, Cyclistic can ensure that their digital marketing efforts are effectively reaching and converting their target audience.
+
+
+## Supporting Visualizations and Key Findings
+
+#### Annual members tend to use Cyclistic bikes to commute to and from work more often than casual riders.
+
+```{r display_graph_of_rides_per_day_of_the_week, results='asis', echo=FALSE}
+divvy_cleaned %>%
+  ggplot(aes(x = ride_day_of_week, fill = ride_day_of_week)) +
+  geom_bar() +
+  labs(title = "Rides per Day of the Week", x = "Day of the Week", y = "Number of Rides") +
+  theme_bw() +
+  ggeasy::easy_add_legend_title("Day of the Week") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+```{r display_rides_per_minute_in_a_day_graph, results='asis', echo=FALSE}
+knitr::include_graphics("memcas_time_day_rides_plot.png")
+```
+Our Rides per Day of the Week graph shows that annual riders ride more often during the week. That coupled with our Rides per Minute in a Day shows the number of rides for each minute of the day graphed for each day of the week, for each bike type, and for members and casual riders. These graphs show that our annual members are using these bikes to commute to and from work much more often than casual riders.
+
+We would do good to encourage casual riders to commute to work using Cyclistic bikes, while pointing out the health, environmental, and cost saving benefits of the annual membership. Perhaps an advertisement contrasting a tired, unhappy worker in loose fitting business wear driving in a dimly lit car on their way to work (briefcase flung into the passenger seat), versus a fit and happy cyclist in sharp well fitting business attire, riding to work with a briefcase (or a sharp/fancy backpack) on a partially cloudy morning.
+
+#### Riders prefer to use Cyclistic bikes in the summer more than any other season and under partly cloudy conditions more than any other conditions.
+
+```{r display_rides_per_season_graph, results='asis', echo=FALSE}
+divvy_cleaned %>%
+  ggplot(aes(x = factor(season, levels = c("Spring", "Summer", "Fall", "Winter")), fill = season)) +
+  geom_bar() +
+  labs(title = "Rides per Season", x ="Season", y = "Number of Rides") +
+  theme_bw() +
+  scale_fill_manual(values = c("Spring" = "green", "Summer" = "yellow", "Fall" = "orange", "Winter" = "cyan")) +
+  ggeasy::easy_add_legend_title("Season") +
+  facet_wrap(rideable_type~member_casual) +
+  scale_y_continuous(labels = comma)
+```
+```{r display_num_of_rides_per_weather_cond_graph, results='asis', echo=FALSE}
+ggplot(divvy_with_weather, aes(x = conditions, fill = conditions)) +
+  geom_bar() +
+  labs(title = "Number of Rides per Weather Condition", x = "Weather Condition", y = "Number of Rides") +
+  facet_wrap(~member_casual) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = "none") +
+  scale_y_continuous(labels = comma)
+```
+```{r display_kable_for_percent_weather_cond_comparison_by_mem, results='asis', echo=FALSE}
+joined_percent_table %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Percent Days per Weather Condition and Percent Rides Per Weather Condition per Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+
+
+The above table shows the expected percent of rides under that condition if weather had no impact on rides. This was determined by finding the percent of days in the year in which those conditions were observed in Chicago. It also shows the observed percentage of rides under each condition, both for casual riders and annual members.
+
+```{r display_percent_diff_per_weather_cond_and_member_kable, results='asis', echo=FALSE}
+conditions_percent_diff %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Percent Difference Between Expected and Actual Ride Percent per Weather Condition by Member Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+The above table subtracts the expected percent from the casual (left) and member (right) ride percentages. This gives us a percent difference for each condition in regards to casuals riders and annual members. For example, there is a positive difference of 10 percent for casual riders on a partially cloudy day (there were 10 percent more rides than would be expected, had weather had no effect.) There was also a negative difference of 5.1 percent for casual riders on Overcast days with rain (there were 5.1 percent less rides than would be expected if weather had no effect on the decision to ride.)
+
+From the above 4 visualizations, we can see that weather and season seems to be a predictable indicator of whether or not riders will ride, however, If we look at these tables and bar charts below, we’ll see that season and month play much bigger rolls than weather.
+
+#### Number of Partially Cloudy days in a 3 year period
+
+```{r display_num_of_p_cloudy_days_in_3_y_p_kable_and_graph, results='asis', echo=FALSE}
+new_p_cloudy_count %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Partially Cloudy Days per Month over Three Years", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+new_p_cloudy_count %>%
+  ggplot(aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  labs(title = "Partially Cloudy Days in a 3 Year Period by Month", x = "Month", y = "Number of Days") +
+  scale_y_continuous(labels = comma)
+```
+
+#### Number of Rides per Month
+
+```{r num_of_rides_per_month_kable_and_graph, results='asis', echo=FALSE}
+ride_per_month_count %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Number of Rides per Month", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+
+ride_per_month_count %>%
+  ggplot(aes(x = month, y = count, fill = month)) +
+  geom_bar(stat = "identity") +
+  theme_bw() +
+  labs(title = "Rides per Month", x = "Month", y = "Number of Rides") +
+  scale_y_continuous(labels = comma)
+```
+
+Based on this data, it would be in Cyclistic’s best interest to conduct advertisement campaigns during summer months, with July having the highest priority, followed by June, August, and September. In these ads, graphics should depict a partially cloudy sky, if possible.
+
+#### Casual Riders use bikes to sight-see more than annual members and visit more locations assosciated with tourism
+
+##### Average Duration of Ride by Bicycle Type and Membership
+
+```{r avg_dur_ride_by_bike_type_and_mem, results='asis', echo=FALSE}
+avg_duration_by_rideable_and_mem_type <- divvy_cleaned %>%
+  group_by(member_casual, rideable_type) %>%
+  summarize(average_ride_duration = mean(ride_duration_in_seconds)) %>%
+  rename("Bike Style" = rideable_type,
+         "Membership Type" = member_casual,
+         "Average Ride Duration in Seconds" = average_ride_duration)
+
+avg_duration_by_rideable_and_mem_type %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds per Rideable Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+##### Average Distance of Ride by Bicycle Type and Membership
+
+```{r avg_dist_ride_by_bike_type_and_mem, results='asis', echo=FALSE}
+avg_distance_by_rideable_and_mem_type <- divvy_cleaned %>%
+  group_by(member_casual, rideable_type) %>%
+  summarize(average_ride_distance = mean(ride_distance_in_meters)) %>%
+  rename("Bike Style" = rideable_type,
+         "Membership Type" = member_casual,
+         "Average Ride Distance in Meters" = average_ride_distance)
+  
+avg_distance_by_rideable_and_mem_type %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+##### Number of Round-trips by Bicycle Type and Membership
+
+(Round-trip is defined as a trip having the same start and end station)
+
+```{r display_table_for_same_start_and_end_station_by_mem_and_bike_type, results='asis', echo=FALSE}
+same_start_and_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Nubmer of Rides with the Same Start and End Stations by Member and Bike Type", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+From these visualizations, we can see that casual riders enjoy taking rides that start and end at the same station. We can infer several reasons for this. They could be riding for exercise, though they wouldn’t be taking so many more electric bike round trips if that were the case. We can also infer that they are sightseeing. Perhaps they are tourists interesting in riding through Chicago and visiting the popular tourist locations. If so, we should expect their most popular stations to be stations near popular tourist attractions.
+
+Let’s check out the most popular start and end stations for casual riders and annual members.
+
+##### 10 Most Popular Start Stations with Annual Members
+
+```{r display_top_10_annual_start_st_kable, results='asis', echo=FALSE}
+annual_start_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+##### 10 Most Popular End Stations with Annual Members
+
+```{r display_top_10_annual_end_st_kable, results='asis', echo=FALSE}
+annual_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+##### Noteworthy stations popular with annual members.
+
+* Kingsbury St & Kinzie St is located within the River North neighborhood, known for ‘trendy’ restaurants, art galleries, and a nightlife. It’s also close to the Merchandise Mart, the world’s largest commercial building, which houses various showrooms and offices.
+* Clark St & Elm St is located withing the Gold Coast neighborhood, known for it’s luxury shopping, historic mansions, and beautiful architecture. It is also close to Lincoln Park, the largest park in Chicago, which contains the Lincoln Park Zoo and the Lincoln Park Conservatory.
+* Wells St & Concord Ln is located within the Old Town neighborhood, known for historic architecture, theaters, and charming shops. It is also close to Second City comedy club, a well known comedy club famous for launching the careers of many famous comedians.
+* Clinton St & Washington Blvd is located within the West Loop neighborhood, with a thriving nightlife, popular restaurants, and art galleries. It is also near the United Center, home of the Chicago Bulls and the Blackhawks.
+
+##### 10 Most Popular Start Stations with Casual Riders
+
+```{r display_top_10_casual_start_st_kable, results='asis', echo=FALSE}
+casual_start_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+##### 10 Most Popular End Stations with Casual Riders
+
+```{r display_top_10_casual_end_st_kable, results='asis', echo=FALSE}
+casual_end_stations %>% 
+  mutate_if(is.numeric, ~comma(.)) %>%
+kable(align = "c", caption = "Top 10 End Stations for Casual Riders", format = "html") %>%
+  kable_styling(full_width = F, font_size = 16) %>%
+  row_spec(0, bold = TRUE)
+```
+
+##### Notewothy stations popular with casual riders.
+
+* Streeter Dr & Grand Ave is located near Navy Pier, one of the top tourist attractions in Chicago. It has various restaurants, shops, and entertainment options such as the Chicago Shakespeare Theater and the Chicago Children’s Museum.
+* DuSable Lake Shore Dr & Monroe St is located near Grant Park, a large urban park in downtown Chicago, that has various attractions including the Art Institute of Chicago, Buckingham Fountain, and the Museum Campus, which contains the Field Museum, the Shedd Aquarium, and the Adler Planetarium.
+* Millennium Park is widely popular, being home to the Cloud Gate sculpture (known as “The Bean”) and the Crown Fountain. It also holds several outdoor concerts and events throughout the year.
+* Michigan Ave & Oak ST is located near the Magnificent Mile, a popular shopping district in Chicago, containing various luxury retailers, restaurants, and department stores. It is also close to the historic Water Tower, one of the few buildings that survived the Greaet Chicago Fire of 1871.
+
+From these observations, we can see that annual members tend to frequent places with restaurants, active nightlife scenes, as well as Lincoln Park and the Old Town neighborhood. Casual riders seem to prefer more tourist popular spots, like the Navy Pier, Grant Park, the famous “The Bean” sculpture, the Magnificent Mile, Theater on the Lake, and the Shedd Aquarium.
+
+To showcase the benefits of the annual membership to tourists who might not be staying in Chicago for long, we can point out that, with the annual pass, they can ride where ever they want, see the various attractions that Chicago has to offer, and that if they are going to be in town for more than a week, it is cheaper to buy the annual pass that to buy more than 7 day passes. Alternatively, we can point out that the annual pass is a better deal then paying for single rides, assuming you’re going to be riding for more than 9 and a half hours over the course of your trip to Chicago. which is something we can point out that they ought to do if they want to see all of the tourist attractions that Chicago has to offer.
+
+A generic ad could focus on the known benefits to physical and mental health regular of cycling, the environmental and personal economic benefits of commuting to and from work on a bicycle, popular tourist locations and sightseeing options, the overall fun of cycling, and/or the benefits of being able to tailor cycling workouts to your preferred intensity (by having a clip of someone biking casually for exercise, and someone pushing them self to their limits for a high-intensity workout).
+
+
+## Recommendations
+
+To encourage casual riders to become annual members, Cyclistic could create marketing strategies that emphasize the health, environmental, and cost-saving benefits of commuting to work on Cyclistic bikes. As an example, Cyclistic could launch a campaign that showcases the contrast between a fatigued, dissatisfied commuter driving alone in a dimly lit car to work and a healthy, content cyclist in stylish and well-fitted professional attire riding to work with a sleek briefcase or a trendy backpack on a pleasant morning.
+
+To encourage more frequent use of Cyclistic bikes by annual members, Cyclistic could create a “commuter” membership option that includes additional benefits specifically tailored for those who use the bikes to commute to work. This membership could offer discounted pricing for rides taken during peak hours, access to preferred parking spots, and a guarantee that a bike will be available during commuting hours. To support this initiative, new stations could be built in popular commuting locations such as Kingsbury St & Kinzie St, located near Merchandise Mart, the world’s largest commercial building. By analyzing individual rider data, Cyclistic could create rider archetypes and identify the ideal locations for new “commuter” member stations.
+
+Cyclistic could implement a referral program to incentivize annual members to refer their friends to join. The referral program could offer discounts on future rides or a free month of membership for both the referrer and the new member. This program could provide an opportunity for existing members to save on their membership fees while also expanding Cyclistic’s user base.
+
+Curating bike routes that highlight popular tourist attractions can provide significant benefits for Cyclistic and its users. By offering these unique routes through the app, Cyclistic can attract new users, including casual riders who are looking to explore the city. As more riders discover and enjoy the curated routes, Cyclistic can then offer incentives and promotions to encourage them to become annual members. This approach not only establishes long-term loyalty but also increases brand exposure and revenue potential. By analyzing rider data, Cyclistic can further personalize these curated routes to specific rider archetypes, making the experience even more enjoyable for all users. Overall, this investment in curated bike routes is a valuable opportunity for Cyclistic to expand its user base, generate steady revenue, and enhance the overall user experience.
+
+To further encourage casual riders to become annual members, Cyclistic can launch targeted marketing campaigns during the summer months when riders prefer to use their bikes more. The marketing campaigns can offer promotions, discounts, or other incentives such as providing free accessories like water bottles or hosting summer-themed events at popular bike stations. For example, Cyclistic could offer a discount on annual memberships for riders who complete a certain number of rides during the summer months. This approach can help convert casual riders into annual members and increase revenue for Cyclistic during peak riding season.
+
+Additionally, Cyclistic could collect more data on the reasons why casual riders use the bikes and create rider archetypes to identify common patterns. With this information, Cyclistic could develop tailored marketing strategies that highlight the benefits of an annual membership, such as cost savings and health benefits, to encourage more casual riders to become annual members.
+
+To effectively use influencer marketing, Cyclistic should identify influencers that align with its brand values and target audience. These influencers could promote the benefits of cycling and using Cyclistic bikes and offer discounts to incentivize their followers to try the bikes. User-generated content could be leveraged to showcase positive experiences and generate brand awareness. To measure the effectiveness of campaigns, Cyclistic could track metrics such as engagement rates, conversion rates, and brand mentions.
