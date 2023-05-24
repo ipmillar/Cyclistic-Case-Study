@@ -29,8 +29,19 @@ The data is available for download [here](https://divvy-tripdata.s3.amazonaws.co
 ###### [(*Data License Agreement*)](https://ride.divvybikes.com/data-license-agreement)
 The data used in this case study ranges from March 1st of 2022 to February 28th of 2023
 
+The bike dataset contains valuable information about the bike rides, providing details such as the bike type utilized, the start and end locations and times, whether the rider was an annual member or casual rider, and a unique identifier for each bike ride.
 
-We will also be using Chicago Climate data from March 1st, 2022 to February 28th, 2023. This data was made available by the [Visual Crossing Corporation's](https://www.visualcrossing.com/) [Weather Query Builder](https://www.visualcrossing.com/weather/weather-data-services#)
+The data includes the 13 following columns:
+
+ [1] "ride_id"            "rideable_type"      "started_at"        
+ [4] "ended_at"           "start_station_name" "start_station_id"  
+ [7] "end_station_name"   "end_station_id"     "start_lat"         
+[10] "start_lng"          "end_lat"            "end_lng"           
+[13] "member_casual" 
+
+We will also be using Chicago Climate data from March 1st, 2020 to February 28th, 2023. This data was made available by the [Visual Crossing Corporation's](https://www.visualcrossing.com/) [Weather Query Builder](https://www.visualcrossing.com/weather/weather-data-services#)
+
+The data encompasses a wide range of meteorological parameters, including location name, date, and time of the weather recordings. Key data elements encompass the daily maximum, minimum, and average temperatures, along with corresponding "feels like" temperatures that factor in humidity and wind conditions. Additional details encompass dew count, humidity levels, precipitation volume, probability, cover, and type, as well as snow-related measurements such as occurrence and depth. Wind characteristics are captured through gusts, direction, and speed. The dataset also includes sea level pressure, cloud cover, visibility, solar radiation levels, solar energy, UV index, severe risk indicators, sunrise, sunset, moon phases, and weather conditions described both succinctly and in terms of corresponding forecast icons.
 
 This data includes the following 33 columns:
 
