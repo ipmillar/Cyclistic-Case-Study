@@ -1,8 +1,11 @@
 ---
-title: "Cyclistic: A Case Study"
+title: 'Cyclistic: A Case Study'
 author: "Ian Millar"
 date: "2023-03-30"
-output: html_document
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -516,9 +519,10 @@ start_summary <- divvy_cleaned %>%
   head(10)
 start_summary %>% 
     mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Summary of Average Ride Duration and Distance for Starting Stations", format = "html") %>%
+kable(align = "c", caption = "Summary of Average Ride Duration and Distance for Starting Stations", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ```{r create_end_summary_for_station_names, echo=TRUE, eval=TRUE}
@@ -531,9 +535,10 @@ end_summary <- divvy_cleaned %>%
   head(10)
 end_summary %>% 
     mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Summary of Average Ride Duration and Distance for Ending Stations", format = "html") %>%
+kable(align = "c", caption = "Summary of Average Ride Duration and Distance for Ending Stations", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 let's see what kinds of rides members and casual users go for, and what kinds of bikes they use.
@@ -546,9 +551,10 @@ rides_bikes_and_member_type <- divvy_cleaned %>%
             total_rides = n())
 rides_bikes_and_member_type %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Duration and Distance by Bike and Member Type", format = "html") %>%
+kable(align = "c", caption = "Average Duration and Distance by Bike and Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Interesting. A cursory glance reveals that members tend to take rides lasting a shorter time, and more rides than casual riders. I'm also curious about this rideable_type, docked_bike. We'll investigate that a little further on. I believe that docked_bike is a mislabeled classic bike or an electric bike. Interesting that the error only showed up on casual bikes. For now, let's keep cleaning the data.
@@ -697,9 +703,10 @@ percent_per_condition_per_member_type <- divvy_with_weather %>%
 
 percent_per_condition_per_member_type %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Rides per Weather Condition Percent per Member Type", format = "html") %>%
+kable(align = "c", caption = "Rides per Weather Condition Percent per Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Now I'm wondering, is that just because most days are partly cloudy? Let's check out our weather data real quick. We'll make another bar chart.
@@ -723,9 +730,10 @@ percent_weather_condition_in_chicago <- Chicago_Il_2022_03_01_to_2023_02_28 %>%
 
 percent_weather_condition_in_chicago %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Percent of Days per Weather Condition in Chicago", format = "html") %>%
+kable(align = "c", caption = "Percent of Days per Weather Condition in Chicago", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Let's combine this tibble with the previous one using a left join to get a better look.
@@ -737,9 +745,10 @@ joined_percent_table <- joined_percent_table %>% select(conditions, expected_per
 
 joined_percent_table %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Percent Days per Weather Condition and Percent Rides Per Weather Condition per Member Type", format = "html") %>%
+kable(align = "c", caption = "Percent Days per Weather Condition and Percent Rides Per Weather Condition per Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 **Note:** expected_percent refers to the percent of days in our year that these conditions occured. members refers to the percent of member rides with these conditions, and casual refers to the percent of casual rides with these weather conditions. n is number of days in the year and can be ignored.
 
@@ -754,9 +763,10 @@ conditions_percent_diff <- joined_percent_table %>%
 
 conditions_percent_diff %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Percent Difference Between Expected and Actual Ride Percent per Weather Condition by Member Type", format = "html") %>%
+kable(align = "c", caption = "Percent Difference Between Expected and Actual Ride Percent per Weather Condition by Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Interesting. It seems like some weather conditions do play a part in whether or not riders decide to ride that day, though it seems weather affects the decision for casual members more so than it does for annual members. Perhaps it's because they don't want to pay for a ride if the weather is unfavorable, whereas the annual members already payed, so they don't mind.
@@ -776,9 +786,10 @@ p_cloudy_count <- partially_cloudy %>%
 
 p_cloudy_count %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Partially Cloudy Days per Month", format = "html") %>%
+kable(align = "c", caption = "Partially Cloudy Days per Month", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Interesting, now I wonder how well these months actually perform. Let’s take a quick look at that.
@@ -792,9 +803,10 @@ ride_per_month_count <- divvy_cleaned %>%
 
 ride_per_month_count %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Number of Rides per Month", format = "html") %>%
+kable(align = "c", caption = "Number of Rides per Month", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Okay, we see that the summer months perform the best, that’s to be expected from our rides per season graph. Maybe we’d see something else if we used a larger data set for our first table. The most I can get for free is an additional 2 years of data, so let’s add that to our data set and see if that changes anything.
@@ -841,18 +853,20 @@ ride_per_month_count %>%
   labs(title = "Rides per Month", x = "Month", y = "Number of Rides") +
   scale_y_continuous(labels = comma)
 ```
-```{rcomp_r_p_m_kables}
+```{r comp_r_p_m_kables}
 new_p_cloudy_count %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Partially Cloudy Days per Month over Three Years", format = "html") %>%
+kable(align = "c", caption = "Partially Cloudy Days per Month over Three Years", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 ride_per_month_count %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Number of Rides per Month", format = "html") %>%
+kable(align = "c", caption = "Number of Rides per Month", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 This definitely gives us a better insight into which months have the most partially cloudy days, and by comparing the two tables, we can see that, while November has the most partially cloudy days over the last 3 years, and July has the third most partially cloudy days, more rides take place in July, with it being the number one month on the rides per month table, while November falls into 8th place. Perhaps Partially Cloudy isn’t as favorable if it’s not in Summer.
@@ -881,15 +895,17 @@ avg_distance <- divvy_cleaned %>%
 
 avg_duration %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Duration in Seconds per Member Type", format = "html") %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds per Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 avg_distance %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Distance in Meters per Member Type", format = "html") %>%
+kable(align = "c", caption = "Average Ride Distance in Meters per Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 
@@ -904,9 +920,10 @@ same_start_and_end_stations <- divvy_cleaned %>%
 
 same_start_and_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Number of Rides with the Same Start and End Station per Member Type", format = "html") %>%
+kable(align = "c", caption = "Number of Rides with the Same Start and End Station per Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 As we guessed, casual riders had 70.1964% more 'round trips' (in which they started and ended at the same station) than annual members. These are probably tourists, or people riding the bikes for exercise or site-seeing.
@@ -1087,27 +1104,31 @@ Let’s check out our new tables.
 ```{r view_kables_for_top_start_and_end_stations_by_mem_type}
 annual_start_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format = "html") %>%
+kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 annual_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = "html") %>%
+kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 casual_start_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format = "html") %>%
+kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 casual_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 End Stations for Casual Riders", format = "html") %>%
+kable(align = "c", caption = "Top 10 End Stations for Casual Riders", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 Very interesting results here. For one thing, it’s interesting that the annual members top 10 are all within a range of under 7,000 ride counts of one another, while casual riders top 10 are within a range of more than 42,000 rides, the largest gap being between the most and second most popular station for casual riders; Streeter Dr & Grand Ave.
@@ -1141,15 +1162,17 @@ avg_distance_per_rideable_type <- divvy_cleaned %>%
 
 avg_duration_per_rideable_type %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Duration in Seconds per Rideable Type", format = "html") %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds per Rideable Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 avg_distance_per_rideable_type %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type", format = "html") %>%
+kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 The first thing I noticed from these tables is that casual and member riders ride the electric bike for less time than the classic bike, but also for farther distances than the classic bike. This leads me to believe that more riders tend to ride the electric bikes to get to places than they do the classic bike. This also suggests that the classic bikes are rode more often for the pleasure of riding, or for exercise, than the electric bikes are. The difference in duration is much more extreme for casual riders than it is for annual members. That could imply that members are using electric bikes for leisurely rides more than casual riders. It could also mean that casual riders are going significantly faster on electric bikes than members.
@@ -1167,9 +1190,10 @@ same_start_and_end_stations <- divvy_cleaned %>%
 
 same_start_and_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Nubmer of Rides with the Same Start and End Stations by Member and Bike Type", format = "html") %>%
+kable(align = "c", caption = "Nubmer of Rides with the Same Start and End Stations by Member and Bike Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 45.67% of members round trips are on electric bikes 39.21% of casual round trips are on electric bikes
@@ -1196,9 +1220,10 @@ avg_duration <- divvy_cleaned %>%
 
 avg_duration %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Duration in Seconds", format = "html") %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 ```{r quick_maffs_2}
 (1000.901 / 60)
@@ -1295,9 +1320,10 @@ ggplot(divvy_with_weather, aes(x = conditions, fill = conditions)) +
 ```{r display_kable_for_percent_weather_cond_comparison_by_mem, results='asis', echo=FALSE}
 joined_percent_table %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Percent Days per Weather Condition and Percent Rides Per Weather Condition per Member Type", format = "html") %>%
+kable(align = "c", caption = "Percent Days per Weather Condition and Percent Rides Per Weather Condition per Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 
@@ -1307,9 +1333,10 @@ The above table shows the expected percent of rides under that condition if weat
 ```{r display_percent_diff_per_weather_cond_and_member_kable, results='asis', echo=FALSE}
 conditions_percent_diff %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Percent Difference Between Expected and Actual Ride Percent per Weather Condition by Member Type", format = "html") %>%
+kable(align = "c", caption = "Percent Difference Between Expected and Actual Ride Percent per Weather Condition by Member Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 The above table subtracts the expected percent from the casual (left) and member (right) ride percentages. This gives us a percent difference for each condition in regards to casuals riders and annual members. For example, there is a positive difference of 10 percent for casual riders on a partially cloudy day (there were 10 percent more rides than would be expected, had weather had no effect.) There was also a negative difference of 5.1 percent for casual riders on Overcast days with rain (there were 5.1 percent less rides than would be expected if weather had no effect on the decision to ride.)
@@ -1321,9 +1348,10 @@ From the above 4 visualizations, we can see that weather and season seems to be 
 ```{r display_num_of_p_cloudy_days_in_3_y_p_kable_and_graph, results='asis', echo=FALSE}
 new_p_cloudy_count %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Partially Cloudy Days per Month over Three Years", format = "html") %>%
+kable(align = "c", caption = "Partially Cloudy Days per Month over Three Years", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 new_p_cloudy_count %>%
   ggplot(aes(x = month, y = count, fill = month)) +
@@ -1338,9 +1366,10 @@ new_p_cloudy_count %>%
 ```{r num_of_rides_per_month_kable_and_graph, results='asis', echo=FALSE}
 ride_per_month_count %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Number of Rides per Month", format = "html") %>%
+kable(align = "c", caption = "Number of Rides per Month", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 
 ride_per_month_count %>%
   ggplot(aes(x = month, y = count, fill = month)) +
@@ -1366,9 +1395,10 @@ avg_duration_by_rideable_and_mem_type <- divvy_cleaned %>%
 
 avg_duration_by_rideable_and_mem_type %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Duration in Seconds per Rideable Type", format = "html") %>%
+kable(align = "c", caption = "Average Ride Duration in Seconds per Rideable Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ##### Average Distance of Ride by Bicycle Type and Membership
@@ -1383,9 +1413,10 @@ avg_distance_by_rideable_and_mem_type <- divvy_cleaned %>%
   
 avg_distance_by_rideable_and_mem_type %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type", format = "html") %>%
+kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ##### Number of Round-trips by Bicycle Type and Membership
@@ -1395,9 +1426,10 @@ kable(align = "c", caption = "Average Ride Distance in Meters per Rideable Type"
 ```{r display_table_for_same_start_and_end_station_by_mem_and_bike_type, results='asis', echo=FALSE}
 same_start_and_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Nubmer of Rides with the Same Start and End Stations by Member and Bike Type", format = "html") %>%
+kable(align = "c", caption = "Nubmer of Rides with the Same Start and End Stations by Member and Bike Type", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 From these visualizations, we can see that casual riders enjoy taking rides that start and end at the same station. We can infer several reasons for this. They could be riding for exercise, though they wouldn’t be taking so many more electric bike round trips if that were the case. We can also infer that they are sightseeing. Perhaps they are tourists interesting in riding through Chicago and visiting the popular tourist locations. If so, we should expect their most popular stations to be stations near popular tourist attractions.
@@ -1409,9 +1441,10 @@ Let’s check out the most popular start and end stations for casual riders and 
 ```{r display_top_10_annual_start_st_kable, results='asis', echo=FALSE}
 annual_start_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format = "html") %>%
+kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ##### 10 Most Popular End Stations with Annual Members
@@ -1419,9 +1452,10 @@ kable(align = "c", caption = "Top 10 Start Stations for Annual Members", format 
 ```{r display_top_10_annual_end_st_kable, results='asis', echo=FALSE}
 annual_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = "html") %>%
+kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ##### Noteworthy stations popular with annual members.
@@ -1436,9 +1470,10 @@ kable(align = "c", caption = "Top 10 End Stations for Annual Members", format = 
 ```{r display_top_10_casual_start_st_kable, results='asis', echo=FALSE}
 casual_start_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format = "html") %>%
+kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ##### 10 Most Popular End Stations with Casual Riders
@@ -1446,9 +1481,10 @@ kable(align = "c", caption = "Top 10 Start Stations for Casual Riders", format =
 ```{r display_top_10_casual_end_st_kable, results='asis', echo=FALSE}
 casual_end_stations %>% 
   mutate_if(is.numeric, ~comma(.)) %>%
-kable(align = "c", caption = "Top 10 End Stations for Casual Riders", format = "html") %>%
+kable(align = "c", caption = "Top 10 End Stations for Casual Riders", format = "latex") %>%
   kable_styling(full_width = F, font_size = 16) %>%
-  row_spec(0, bold = TRUE)
+  row_spec(0, bold = TRUE) %>%
+  cat("\\resizebox{\\textwidth}{!}{", ., "}\n")
 ```
 
 ##### Notewothy stations popular with casual riders.
