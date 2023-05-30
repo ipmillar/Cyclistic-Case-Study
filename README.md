@@ -8,3 +8,5 @@ For an executive report summarizing the conducted study, please refer to the [Cy
 For a detailed analysis of the data, including key findings and recommendations for increasing annual memberships and user engagement, please refer to the file [Cyclistic Bike-share Data Analysis.pdf](https://github.com/ipmillar/Cyclistic-Case-Study/blob/main/Cyclistic%20Bike-share%20Data%20Analysis.pdf).
 
 For a comprehensive report detailing the data modifications and all the performed analyses, please refer to the [Cyclistic_Case_Study.html](https://htmlpreview.github.io/?https://github.com/ipmillar/Cyclistic-Case-Study/blob/main/Cyclistic_Case_Study.html) file.
+
+To access the complete code used in this project, please refer to the [Cyclistic_Case_Study.rmd](https://github.com/ipmillar/Cyclistic-Case-Study/blob/main/Cyclistic_Case_Study.Rmd) file. This file contains the comprehensive code implementation for the entire project, allowing you to explore the technical details in depth.
